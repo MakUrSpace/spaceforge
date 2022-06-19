@@ -16,17 +16,18 @@ RUN cd qt5-build && make -j4 && make install
 RUN export PATH="/root/qt5-build/qtbase/bin:${PATH}"
 RUN echo 'export PATH=/root/qt5-build/qtbase/bin:$PATH' > ~/.bashrc
 
-RUN wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz && tar -zxf boost_1_74_0.tar.gz && cd boost_1_74_0 && ./bootstrap.sh && ./b2 install
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
+RUN tar -zxf boost_1_74_0.tar.gz && cd boost_1_74_0 && ./bootstrap.sh && ./b2 install
 
 RUN wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.9.1/CGAL-4.9.1.tar.xz
 RUN tar -xf CGAL-4.9.1.tar.xz && cd CGAL-4.9.1 && cmake . && make -j4 && make install
 
 RUN wget https://www.riverbankcomputing.com/static/Downloads/QScintilla/2.11/QScintilla_gpl-2.11.tar.gz && tar -zxf QScintilla_gpl-2.11.tar.gz
-RUN cd QScintilla_gpl-2.11/Qt4Qt5 && qmake qscintilla.pro && make -j4 && make install
-RUN export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && echo 'export LD_LIBRARY_PATH:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+RUN export PATH="/root/qt5-build/qtbase/bin:${PATH}" && cd QScintilla_gpl-2.11/Qt4Qt5 && qmake qscintilla.pro && make -j4 && make install
+RUN export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && echo 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
  
 RUN git clone https://github.com/openscad/openscad.git
-RUN cd openscad && qmake openscad.pro
+RUN export PATH="/root/qt5-build/qtbase/bin:${PATH}" && cd openscad && qmake openscad.pro
 RUN sed -i 's/-mt//g' openscad/Makefile 
 RUN cd openscad && make -j4 && make install
 

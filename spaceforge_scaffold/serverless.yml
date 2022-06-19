@@ -1,0 +1,14 @@
+service: spaceforge
+
+provider:
+  name: aws
+  stage: prod
+  region: us-east-1
+  ecr:
+    images:
+      spaceforge:
+        path: ./
+
+functions:
+  sf:
+    image: spaceforge
