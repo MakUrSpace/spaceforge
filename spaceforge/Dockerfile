@@ -14,6 +14,7 @@ COPY local_lib /usr/local/
 COPY local_qt_lib /usr/local/lib/qtlib
 ENV LD_LIBRARY_PATH="/usr/local/lib:/usr/local/lib/qtlib:${LD_LIBRARY_PATH}"
 COPY openscad ${LAMBDA_TASK_ROOT}
+COPY sf_operations.py ${LAMBDA_TASK_ROOT}
 COPY spaceforge.py ${LAMBDA_TASK_ROOT}
 
 RUN chmod o+rx /root

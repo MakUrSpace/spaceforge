@@ -1,120 +1,58 @@
-from subprocess import run
+
 from dataclasses import dataclass
 
-import boto3
-import solid as sp
-
-
-@dataclass
-class ForgeOperation:
-    operationType: str
-
-    @classmethod
-    def fromGenericOperation(cls, op):
-        return cls(op[0])
-
-    def execute(self, model):
-        return model
-
-
-@dataclass
-class MoveObjectOperation(ForgeOperation):
-    operands: []
-
-    @classmethod
-    def fromGenericOperation(cls, op):
-        return cls(op[0], op[1:4])
-
-
-@dataclass
-class RotateOperation(MoveObjectOperation):
-    def execute(self, model):
-        return sp.rotate(self.operands)(model)
-
-
-@dataclass
-class TranslateOperation(MoveObjectOperation):
-    def execute(self, model):
-        return sp.translate(self.operands)(model)
-
-
-@dataclass
-class CombineOperation(ForgeOperation):
-    secondAsset: str
-
-    @classmethod
-    def fromGenericOperation(cls, op):
-        return cls(op[0], op[1])
-
-    def execute(self, model):
-        boto3.client("s3").download_file(
-            "spaceforge",
-            f"models/{self.secondAsset}",
-            f"/tmp/{self.secondAsset}")
-        secondAsset = sp.import_stl(f"/tmp/{self.secondAsset}")
-        return model + secondAsset
-
-
-@dataclass
-class EngraveOperation(ForgeOperation):
-    engravingTemplate: str
-    scale: []
-
-    @classmethod
-    def fromGenericOperation(cls, op):
-        return cls(op[0], op[1:4])
-
-    def execute(self, model):
-        boto3.client("s3").download_file(
-            "spaceforge",
-            f"engraving_templates/{self.engravingTemplate}",
-            f"/tmp/{self.engravingTemplate}")
-        engravingTemplate = sp.scale(self.scale)(sp.import_stl(self.engravingTemplate))
-        return model - engravingTemplate
+from sf_operations import Spaceforge
 
 
 @dataclass
 class ForgeOrder:
-    model: str
     operations: []
-    output: str
 
 
 example_event = {
-    "model": "mjolnir-ragnarok-endgame.stl",
     "operations": [
-        ["combine", "HammeredTriviaLogo.stl"]
-    ],
-    "output": "HammeredTriviaTrophy.stl"
+        ["import", "hammer2.stl"],
+        ["import", "HammeredTriviaLogo.stl"],
+        ["rotate", "HammeredTriviaLogo.stl", [0, 0, 90.00001], "logo90"],
+        ["rotate", "HammeredTriviaLogo.stl", [0, 0, 270.00001], "logo270"],
+        ["translate", "logo270", [200, 0, 0], "logo270"],
+        ["combine", "logo90", "logo270", "sideLogos"],
+        ["text", "Hammered", 16, 4, "hammered"],
+        ["rotate", "hammered", [90, 0, 0], "hammered"],
+        ["translate", "hammered", [-54, 2, 74.5], "hammered"],
+        ["text", "Trivia", 16, 4, "trivia"],
+        ["rotate", "trivia", [90, 0, 0], "trivia"],
+        ["translate", "trivia", [-25, 2, 54.5], "trivia"],
+        ["combine", "hammered", "trivia", "hammeredTrivia"],
+        ["text", "1st Place", 12, 4, "firstPlace"],
+        ["rotate", "firstPlace", [90, 0, 0], "firstPlace"],
+        ["translate", "firstPlace", [-34, 2, 40], "firstPlace"],
+        ["combine", "hammeredTrivia", "firstPlace", "frontNamePlate"],
+        ["text", "Ruckus Pizza", 16, 4, "pizza"],
+        ["rotate", "pizza", [90, 0, 0], "pizza"],
+        ["translate", "pizza", [-68, 2, 60.5], "pizza"],
+        ["text", "6-19-2022", 12, 4, "date"],
+        ["rotate", "date", [90, 0, 0], "date"],
+        ["translate", "date", [-37.5, 2, 45], "date"],
+        ["combine", "pizza", "date", "backNamePlate"],
+        ["scale", "hammer2.stl", [4, 4, 4], "trophy"],
+        ["translate", "trophy", [-66, -31, 0], "trophy"],
+        ["engrave", "trophy", "sideLogos", "trophy"],
+        ["translate", "trophy", [0, 60, 0], "trophy"],
+        ["engrave", "trophy", "frontNamePlate", "trophy"],
+        ["rotate", "trophy", [0, 0, 180], "trophy"],
+        ["translate", "trophy", [0, 120, 0], "trophy"],
+        ["engrave", "trophy", "backNamePlate", "trophy"],
+        ["export", "trophy", "HammeredTriviaTrophy.stl"]
+    ]
 }
 
 
 def lambda_handler(event, context):
     order = ForgeOrder(**event)
-
-    # Download model from s3
-    boto3.client("s3").download_file("spaceforge", f"models/{order.model}", f"/tmp/{order.model}")
-
-    result = sp.import_stl(f"/tmp/{order.model}")
-    for op in order.operations:
-        if op[0] == "rotate":
-            result = RotateOperation.fromGenericOperation(op).execute(result)
-        elif op[0] == "translate":
-            result = TranslateOperation.fromGenericOperation(op).execute(result)
-        elif op[0] == "combine":
-            result = CombineOperation.fromGenericOperation(op).execute(result)
-        elif op[0] == "engrave":
-            result = EngraveOperation.fromGenericOperation(op).execute(result)
-        else:
-            raise Exception(f"Unrecognized operation: {op}")
-
-    if result is not None:
-        sp.scad_render_to_file(result, f"/tmp/{order.model}.scad")
-        run(["/var/task/openscad", "-o", f"/tmp/{order.model}", f"/tmp/{order.model}.scad"])
-        boto3.client("s3").upload_file(f"/tmp/{order.model}", "spaceforge", f"results/{order.output}")
-
-    return 200, f"s3://spaceforge/results/{order.output}"
+    [Spaceforge.operate(op) for op in order.operations]
+    return 200, "Spaceforge Operation Complete"
 
 
 if __name__ == "__main__":
-    print(lambda_handler(None, None))
+    lambda_handler(example_event, None)
