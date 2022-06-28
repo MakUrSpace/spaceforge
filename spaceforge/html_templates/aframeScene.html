@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js" integrity="sha512-/gO16YMp20RIqCZXZyvMlzALQqEoiDU0akshw25wFiXCRGl+0p/HPWkOd8HWFn6bnatGhxakGLfYhWaPPVQIyA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="/aframe-stl-model.js"></script>
+</head>
+<body>
+	<a-scene>
+		<a-assets>
+			<a-asset-item response-type="arraybuffer" id="model" src="/spaceforge_assets/{asset_name}"></a-asset-item>
+		</a-assets>
+		<a-entity position="0 0 -50" stl-model="src: #model" scale="0.1 0.1 0.1" material="color: #00d000; roughness: 1"></a-entity>
+		<a-sky color="#000000"></a-sky>
+	</a-scene>
+</body>
+</html>

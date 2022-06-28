@@ -9,6 +9,42 @@ provider:
       spaceforge:
         path: ./
 
+package:
+  individually: true
+
 functions:
   sf:
     image: spaceforge
+
+  sf-api:
+    handler: spaceforge_api.lambda_handler
+    runtime: python3.9
+    package:
+      patterns:
+        - '!*'
+        - '!*/**'
+        - 'spaceforge_api.py'
+        - 'html_templates/**'
+    events:
+      - http:
+          path: /spaceforge
+          method: get
+      - http:
+          path: /spaceforge
+          method: post
+      - http:
+          path: /spaceforge/assetviewer/{asset_name}
+          method: get
+          request:
+            parameters:
+              path:
+                asset_name: true
+      - http:
+          path: /spaceforge/hammerforge
+          method: get
+      - http:
+          path: /spaceforge/hammerforge/{trophy_name}
+          method: get
+      - http:
+          path: /spaceforge/hammerforge
+          method: post

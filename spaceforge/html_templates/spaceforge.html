@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Spaceforge</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-8" id="modelViewerDiv">
+				<iframe src="/spaceforge/assetviewer/HammeredTriviaTrophy.stl" style="min-height: 800px; min-width: 100%"></iframe>
+			</div>
+			<div class="col" id="instructionEditorDiv">
+				<form action="/spaceforge" method="post">
+					<textarea name="instructionEditor" rows=32 style="min-width: 100%">
+{
+    "operations": [
+        ["import", "hammer2.stl"],
+        ["import", "HammeredTriviaLogo.stl"],
+        ["rotate", "HammeredTriviaLogo.stl", [0, 0, 90.00001], "logo90"],
+        ["rotate", "HammeredTriviaLogo.stl", [0, 0, 270.00001], "logo270"],
+        ["translate", "logo270", [200, 0, 0], "logo270"],
+        ["combine", "logo90", "logo270", "sideLogos"],
+        ["text", "Hammered", 16, 4, "hammered"],
+        ["rotate", "hammered", [90, 0, 0], "hammered"],
+        ["translate", "hammered", [-54, 2, 74.5], "hammered"],
+        ["text", "Trivia", 16, 4, "trivia"],
+        ["rotate", "trivia", [90, 0, 0], "trivia"],
+        ["translate", "trivia", [-25, 2, 54.5], "trivia"],
+        ["combine", "hammered", "trivia", "hammeredTrivia"],
+        ["text", "1st Place", 12, 4, "firstPlace"],
+        ["rotate", "firstPlace", [90, 0, 0], "firstPlace"],
+        ["translate", "firstPlace", [-34, 2, 40], "firstPlace"],
+        ["combine", "hammeredTrivia", "firstPlace", "frontNamePlate"],
+        ["text", "Ruckus Pizza", 16, 4, "pizza"],
+        ["rotate", "pizza", [90, 0, 0], "pizza"],
+        ["translate", "pizza", [-68, 2, 60.5], "pizza"],
+        ["text", "6-19-2022", 12, 4, "date"],
+        ["rotate", "date", [90, 0, 0], "date"],
+        ["translate", "date", [-37.5, 2, 45], "date"],
+        ["combine", "pizza", "date", "backNamePlate"],
+        ["scale", "hammer2.stl", [4, 4, 4], "trophy"],
+        ["translate", "trophy", [-66, -31, 0], "trophy"],
+        ["engrave", "trophy", "sideLogos", "trophy"],
+        ["translate", "trophy", [0, 60, 0], "trophy"],
+        ["engrave", "trophy", "frontNamePlate", "trophy"],
+        ["rotate", "trophy", [0, 0, 180], "trophy"],
+        ["translate", "trophy", [0, 120, 0], "trophy"],
+        ["engrave", "trophy", "backNamePlate", "trophy"],
+        ["export", "trophy", "HammeredTriviaTrophy.stl"]
+    ]
+}
+					</textarea>
+					<input type="submit" value="Submit Model Definition">
+				</form>
+			</div>
+		</div>
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
